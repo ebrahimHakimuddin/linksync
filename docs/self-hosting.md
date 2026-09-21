@@ -1,4 +1,4 @@
-# Self-hosting LinkSync
+# Self-hosting CrossLinks
 
 ## Requirements
 
@@ -6,7 +6,7 @@
 - A public or private DNS name with a certificate trusted by Android and Chrome.
 - An HTTPS reverse proxy that supports WebSocket upgrades.
 
-LinkSync deliberately rejects non-loopback HTTP configuration. For LAN-first use,
+CrossLinks deliberately rejects non-loopback HTTP configuration. For LAN-first use,
 configure split-horizon DNS so a trusted hostname resolves to the server's private
 address on the home network. Put that origin in `LINKSYNC_LAN_URL`; clients try it
 before `LINKSYNC_PUBLIC_URL`.

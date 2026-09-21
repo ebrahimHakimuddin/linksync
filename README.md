@@ -1,6 +1,6 @@
-# LinkSync
+# CrossLinks
 
-LinkSync sends a URL from Android to a selected Chrome installation and opens it
+CrossLinks sends a URL from Android to a selected Chrome installation and opens it
 as a new tab. It consists of a self-hosted server, a Chrome Manifest V3 extension,
 and an Android share target/browser handler.
 
@@ -18,7 +18,7 @@ pnpm dev:server
 ```
 
 On first start, the server prints a single-use setup URL. Production deployments
-must put the server behind trusted HTTPS. LinkSync does not include or call Jev,
+must put the server behind trusted HTTPS. CrossLinks does not include or call Jev,
 TypeSafe, or any other inference service at runtime.
 
 ## Run the self-hosted server

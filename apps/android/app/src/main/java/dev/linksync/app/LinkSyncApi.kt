@@ -23,7 +23,7 @@ class LinkSyncApi {
                 lastError = error
             }
         }
-        throw lastError ?: IOException("No LinkSync endpoint was reachable")
+        throw lastError ?: IOException("No CrossLinks endpoint was reachable")
     }
 
     fun devices(credentials: Credentials): List<BrowserDevice> {
@@ -68,7 +68,7 @@ class LinkSyncApi {
                 lastError = error
             }
         }
-        throw lastError ?: IOException("No LinkSync endpoint was reachable")
+        throw lastError ?: IOException("No CrossLinks endpoint was reachable")
     }
 
     private fun request(endpoint: String, path: String, method: String, body: String?, token: String?): String {

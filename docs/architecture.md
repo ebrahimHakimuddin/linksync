@@ -1,4 +1,4 @@
-# LinkSync architecture
+# CrossLinks architecture
 
 ## V1 contract
 
@@ -32,4 +32,3 @@ authenticated owner session.
 Jev may be used as a development aid for bounded classification or review tasks.
 It is not part of LinkSync's architecture, dependencies, server, clients, or data
 flow. Complex design and implementation reasoning is handled by Codex.
-
