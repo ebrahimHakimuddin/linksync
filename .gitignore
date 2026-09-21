@@ -1,0 +1,12 @@
+node_modules/
+.pnpm-store/
+dist/
+.DS_Store
+*.log
+*.db
+*.db-shm
+*.db-wal
+.env
+apps/android/.gradle/
+apps/android/local.properties
+apps/android/app/build/

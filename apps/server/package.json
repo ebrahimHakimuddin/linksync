@@ -1,0 +1,32 @@
+{
+  "name": "@linksync/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "node --import tsx --test test/**/*.test.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cookie": "latest",
+    "@fastify/websocket": "latest",
+    "@node-rs/argon2": "latest",
+    "better-sqlite3": "latest",
+    "fastify": "latest",
+    "qrcode": "latest"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "latest",
+    "@types/node": "latest",
+    "@types/qrcode": "latest",
+    "@types/ws": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}

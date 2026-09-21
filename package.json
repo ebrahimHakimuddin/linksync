@@ -1,0 +1,14 @@
+{
+  "name": "linksync",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm --recursive build",
+    "dev:server": "pnpm --filter @linksync/server dev",
+    "test": "pnpm --recursive test",
+    "typecheck": "pnpm --recursive typecheck"
+  }
+}
