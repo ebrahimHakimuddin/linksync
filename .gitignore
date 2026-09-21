@@ -10,4 +10,6 @@ dist/
 apps/android/.gradle/
 apps/android/build/
 apps/android/local.properties
+apps/android/release-key.jks
+apps/android/.release-password
 apps/android/app/build/
