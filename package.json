@@ -7,6 +7,7 @@
   },
   "scripts": {
     "build": "pnpm --recursive build",
+    "build:extension": "pnpm --filter @linksync/extension build",
     "dev:server": "pnpm --filter @linksync/server dev",
     "test": "pnpm --recursive test",
     "typecheck": "pnpm --recursive typecheck"

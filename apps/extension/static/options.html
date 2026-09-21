@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LinkSync settings</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="page">
+    <main class="card settings">
+      <header>
+        <div class="mark" aria-hidden="true">↗</div>
+        <div><h1>LinkSync</h1><p>Pair this browser with your server.</p></div>
+      </header>
+      <form id="pair-form">
+        <label>Server URL<input id="server-url" type="url" required placeholder="https://links.example.com" autocomplete="url"></label>
+        <label>Pairing code<input id="pairing-code" required placeholder="ABCDE-FGHIJ" maxlength="11" autocomplete="one-time-code"></label>
+        <label>Device name<input id="device-name" required maxlength="80" autocomplete="off"></label>
+        <label class="check"><input id="auto-open" type="checkbox"> Open received links automatically</label>
+        <button type="submit">Pair browser</button>
+      </form>
+      <section id="paired" hidden>
+        <h2>Paired</h2>
+        <p id="paired-copy"></p>
+        <label class="check"><input id="paired-auto-open" type="checkbox"> Open received links automatically</label>
+        <button id="unpair" class="secondary" type="button">Forget this server</button>
+      </section>
+      <p id="status" role="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

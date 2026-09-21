@@ -1,0 +1,27 @@
+:root { color-scheme: light dark; font: 15px/1.45 system-ui, sans-serif; background: #eef2f7; color: #172033; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.page { min-height: 100vh; display: grid; place-items: center; padding: 32px; }
+.popup { width: 340px; min-height: 300px; }
+.card { background: Canvas; padding: 22px; border: 1px solid color-mix(in srgb, CanvasText 14%, transparent); box-shadow: 0 16px 40px #14213d1a; }
+.settings { width: min(100%, 540px); border-radius: 18px; }
+header { display: flex; gap: 12px; align-items: center; margin-bottom: 22px; }
+.mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: #2962ff; color: white; font-size: 24px; font-weight: 800; }
+h1, h2, p { margin: 0; }
+h1 { font-size: 21px; }
+h2 { margin: 20px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; opacity: .68; }
+header p, #status { color: color-mix(in srgb, CanvasText 62%, transparent); }
+form, label:not(.check):not(.pause) { display: grid; gap: 7px; }
+form { gap: 16px; }
+input[type="url"], input[type="text"], input:not([type]) { width: 100%; border: 1px solid color-mix(in srgb, CanvasText 24%, transparent); background: Canvas; color: CanvasText; border-radius: 9px; padding: 11px 12px; font: inherit; }
+.check, .pause { display: flex; gap: 9px; align-items: center; }
+.pause { justify-content: space-between; padding: 14px 0; border-block: 1px solid color-mix(in srgb, CanvasText 12%, transparent); }
+button { border: 0; border-radius: 9px; padding: 11px 14px; background: #2962ff; color: white; font: 650 14px system-ui; cursor: pointer; }
+button.secondary { width: 100%; margin-top: 14px; background: color-mix(in srgb, CanvasText 9%, Canvas); color: CanvasText; }
+button:disabled { opacity: .55; cursor: wait; }
+#status { min-height: 22px; margin-top: 16px; }
+#status.error { color: #c62828; }
+.activity { list-style: none; padding: 0; margin: 0; max-height: 150px; overflow: auto; }
+.activity li { padding: 8px 0; border-top: 1px solid color-mix(in srgb, CanvasText 10%, transparent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.activity .empty { opacity: .6; }
+@media (prefers-color-scheme: dark) { :root { background: #10131a; color: #edf2ff; } }
