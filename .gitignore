@@ -8,5 +8,6 @@ dist/
 *.db-wal
 .env
 apps/android/.gradle/
+apps/android/build/
 apps/android/local.properties
 apps/android/app/build/
