@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">LinkSync</string>
+    <string name="pairing_in_progress">Pairing…</string>
+    <string name="sending_in_progress">Sending…</string>
+    <string name="send_complete">Sent. It will open when the browser is available.</string>
+    <string name="history_metadata">%1$s · %2$s</string>
+</resources>
