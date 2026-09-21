@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <title>LinkSync server</title>
+    <link rel="stylesheet" href="/assets/admin.css">
+  </head>
+  <body>
+    <main>
+      <header><div class="mark" aria-hidden="true">↗</div><div><h1>LinkSync</h1><p>Private link delivery</p></div></header>
+      <section id="loading" class="panel"><p>Loading server state…</p></section>
+      <section id="setup" class="panel" hidden>
+        <h2>Set up your server</h2>
+        <p>Create the owner password. The setup token is read from the single-use URL printed by the server.</p>
+        <form id="setup-form">
+          <label>Owner password<input id="setup-password" type="password" minlength="12" maxlength="256" required autocomplete="new-password"></label>
+          <button>Create owner account</button>
+        </form>
+      </section>
+      <section id="login" class="panel" hidden>
+        <h2>Owner sign in</h2>
+        <form id="login-form">
+          <label>Password<input id="login-password" type="password" required autocomplete="current-password"></label>
+          <button>Sign in</button>
+        </form>
+      </section>
+      <div id="dashboard" hidden>
+        <section class="panel">
+          <div class="section-head"><div><h2>Pair a device</h2><p>Pairing codes expire after five minutes and work once.</p></div></div>
+          <div class="actions"><button data-pair="android">Pair Android</button><button data-pair="chrome" class="secondary">Pair Chrome</button></div>
+          <div id="pairing" class="pairing" hidden>
+            <img id="pairing-qr" alt="Device pairing QR code">
+            <div><p class="eyebrow">Manual code</p><strong id="pairing-code"></strong><p id="pairing-expiry"></p></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="section-head"><h2>Devices</h2><button id="refresh" class="quiet">Refresh</button></div>
+          <div id="devices" class="list"></div>
+        </section>
+        <section class="panel">
+          <div class="section-head"><h2>Delivery history</h2><button id="clear-history" class="quiet danger">Clear completed</button></div>
+          <div id="history" class="list"></div>
+        </section>
+        <button id="logout" class="quiet">Sign out</button>
+      </div>
+      <p id="status" role="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="/assets/admin.js"></script>
+  </body>
+</html>

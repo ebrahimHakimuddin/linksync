@@ -32,6 +32,10 @@ describe("LinkSync API", () => {
   after(async () => app.close());
 
   it("configures the owner exactly once", async () => {
+    const page = await app.inject({ method: "GET", url: "/admin" });
+    assert.equal(page.statusCode, 200);
+    assert.match(page.headers["content-security-policy"]!, /default-src 'none'/);
+    assert.match(page.body, /Set up your server/);
     const setup = await app.inject({ method: "POST", url: "/api/v1/setup", payload: { token: setupToken, password } });
     assert.equal(setup.statusCode, 201);
     const repeated = await app.inject({ method: "POST", url: "/api/v1/setup", payload: { token: setupToken, password } });

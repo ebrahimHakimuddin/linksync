@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import cookie from "@fastify/cookie";
 import websocket from "@fastify/websocket";
 import { hash as hashPassword, verify as verifyPassword } from "@node-rs/argon2";
@@ -7,7 +8,7 @@ import QRCode from "qrcode";
 import type { WebSocket } from "ws";
 import type { Config } from "./config.js";
 import { LinkSyncDatabase, type DeliveryRow, type DeviceKind, type DeviceRow } from "./database.js";
-import { bearerToken, hashToken, pairingCode, randomToken } from "./security.js";
+import { bearerToken, hashToken, pairingCode, randomToken, safeHashEquals } from "./security.js";
 import { InvalidSharedUrl, validateSharedUrl } from "./url.js";
 
 declare module "fastify" {
@@ -47,6 +48,26 @@ export async function buildApp(options: BuildOptions): Promise<FastifyInstance> 
   await app.register(cookie);
   await app.register(websocket);
 
+  const publicDirectory = import.meta.url.includes("/dist/")
+    ? new URL("./public/", import.meta.url)
+    : new URL("../public/", import.meta.url);
+  const [adminHtml, adminCss, adminJs] = await Promise.all([
+    readFile(new URL("index.html", publicDirectory), "utf8"),
+    readFile(new URL("admin.css", publicDirectory), "utf8"),
+    readFile(new URL("admin.js", publicDirectory), "utf8")
+  ]);
+
+  app.addHook("onSend", async (request, reply, payload) => {
+    reply.header("X-Content-Type-Options", "nosniff");
+    reply.header("Referrer-Policy", "no-referrer");
+    reply.header("X-Frame-Options", "DENY");
+    reply.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    if (request.url === "/admin" || request.url.startsWith("/assets/")) {
+      reply.header("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    }
+    return payload;
+  });
+
   app.addHook("onClose", async () => {
     for (const clients of sockets.values()) {
       for (const socket of clients) socket.close(1001, "server shutdown");
@@ -65,6 +86,9 @@ export async function buildApp(options: BuildOptions): Promise<FastifyInstance> 
   }
 
   const requireAdmin = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const origin = request.headers.origin;
+    const allowedOrigins = new Set([options.config.publicUrl, options.config.lanUrl].filter(Boolean));
+    if (origin && !allowedOrigins.has(origin)) return void reply.code(403).send({ error: "invalid_origin" });
     const token = request.cookies[SESSION_COOKIE];
     if (!token) return void reply.code(401).send({ error: "admin_auth_required" });
     const session = db.raw.prepare(
@@ -97,13 +121,18 @@ export async function buildApp(options: BuildOptions): Promise<FastifyInstance> 
   };
 
   app.get("/health", async () => ({ status: "ok", setupRequired: !accountExists() }));
+  app.get("/", async (_request, reply) => reply.redirect("/admin"));
+  app.get("/setup", async (_request, reply) => reply.redirect("/admin"));
+  app.get("/admin", async (_request, reply) => reply.type("text/html; charset=utf-8").send(adminHtml));
+  app.get("/assets/admin.css", async (_request, reply) => reply.type("text/css; charset=utf-8").send(adminCss));
+  app.get("/assets/admin.js", async (_request, reply) => reply.type("text/javascript; charset=utf-8").send(adminJs));
 
   app.post<{ Body: JsonBody }>("/api/v1/setup", async (request, reply) => {
     if (accountExists()) return reply.code(409).send({ error: "setup_already_completed" });
     const token = typeof request.body?.token === "string" ? request.body.token : "";
     const password = typeof request.body?.password === "string" ? request.body.password : "";
     const row = db.raw.prepare("SELECT value FROM metadata WHERE key = 'setup_token_hash'").get() as { value: string } | undefined;
-    if (!row || hashToken(token) !== row.value) return reply.code(403).send({ error: "invalid_setup_token" });
+    if (!row || !safeHashEquals(token, row.value)) return reply.code(403).send({ error: "invalid_setup_token" });
     if (password.length < 12 || password.length > 256) {
       return reply.code(400).send({ error: "password_must_be_12_to_256_characters" });
     }
@@ -174,6 +203,8 @@ export async function buildApp(options: BuildOptions): Promise<FastifyInstance> 
 
   app.get("/api/v1/admin/deliveries", { preHandler: requireAdmin }, async () => {
     expireDeliveries();
+    db.raw.prepare("DELETE FROM deliveries WHERE status != 'queued' AND created_at < ?")
+      .run(Date.now() - options.config.historyTtlMs);
     return db.raw.prepare(`
       SELECT d.*, source.name AS source_device_name, target.name AS target_device_name
       FROM deliveries d
@@ -181,6 +212,17 @@ export async function buildApp(options: BuildOptions): Promise<FastifyInstance> 
       JOIN devices target ON target.id = d.target_device_id
       ORDER BY d.created_at DESC LIMIT 250
     `).all();
+  });
+
+  app.delete("/api/v1/admin/deliveries", { preHandler: requireAdmin }, async (_request, reply) => {
+    db.raw.prepare("DELETE FROM deliveries WHERE status != 'queued'").run();
+    return reply.code(204).send();
+  });
+
+  app.delete<{ Params: { id: string } }>("/api/v1/admin/deliveries/:id", { preHandler: requireAdmin }, async (request, reply) => {
+    const result = db.raw.prepare("DELETE FROM deliveries WHERE id = ?").run(request.params.id);
+    if (result.changes === 0) return reply.code(404).send({ error: "delivery_not_found" });
+    return reply.code(204).send();
   });
 
   app.post<{ Body: JsonBody }>("/api/v1/pair", async (request, reply) => {
@@ -361,4 +403,3 @@ export async function buildApp(options: BuildOptions): Promise<FastifyInstance> 
 
   return app;
 }
-
