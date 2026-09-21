@@ -29,6 +29,11 @@ interface JsonBody {
 
 const SESSION_COOKIE = "linksync_session";
 const SESSION_TTL_MS = 12 * 60 * 60 * 1_000;
+const RELEASE_VERSIONS = {
+  server: "0.1.0",
+  android: "0.1.0",
+  extension: "0.1.0"
+} as const;
 
 function cleanName(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -121,6 +126,7 @@ export async function buildApp(options: BuildOptions): Promise<FastifyInstance> 
   };
 
   app.get("/health", async () => ({ status: "ok", setupRequired: !accountExists() }));
+  app.get("/api/v1/version", { preHandler: requireDevice }, async () => RELEASE_VERSIONS);
   app.get("/", async (_request, reply) => reply.redirect("/admin"));
   app.get("/setup", async (_request, reply) => reply.redirect("/admin"));
   app.get("/admin", async (_request, reply) => reply.type("text/html; charset=utf-8").send(adminHtml));

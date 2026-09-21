@@ -69,6 +69,11 @@ describe("LinkSync API", () => {
   it("pairs devices and delivers a URL idempotently", async () => {
     const android = await pair("android", "Phone");
     const chrome = await pair("chrome", "Desk", true);
+    const versions = await app.inject({
+      method: "GET", url: "/api/v1/version", headers: { authorization: `Bearer ${android.token}` }
+    });
+    assert.equal(versions.statusCode, 200);
+    assert.deepEqual(Object.keys(versions.json()).sort(), ["android", "extension", "server"]);
     const payload = { url: "https://example.com/path?q=1#section", targetDeviceId: chrome.deviceId, idempotencyKey: "share-1" };
 
     const created = await app.inject({
