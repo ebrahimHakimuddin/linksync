@@ -25,6 +25,12 @@ data class HistoryItem(
     val createdAt: Long,
 )
 
+data class ReleaseVersions(
+    val server: String,
+    val android: String,
+    val extension: String,
+)
+
 data class PairingPayload(
     val code: String,
     val endpoints: List<String>,

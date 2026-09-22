@@ -54,6 +54,11 @@ class LinkSyncApi {
         }.toList()
     }
 
+    fun versions(credentials: Credentials): ReleaseVersions {
+        val json = JSONObject(authenticatedRequest(credentials, "/api/v1/version", "GET"))
+        return ReleaseVersions(json.getString("server"), json.getString("android"), json.getString("extension"))
+    }
+
     private fun authenticatedRequest(
         credentials: Credentials,
         path: String,

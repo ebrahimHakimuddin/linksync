@@ -1,9 +1,16 @@
 <resources>
     <style name="Theme.LinkSync" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#2962FF</item>
+        <item name="android:colorAccent">#D95D39</item>
         <item name="android:navigationBarColor">#F2F5FA</item>
         <item name="android:statusBarColor">#F2F5FA</item>
         <item name="android:windowLightStatusBar">true</item>
+    </style>
+    <style name="Theme.CrossLinks.Share" parent="android:style/Theme.Material.Light.Dialog.Alert">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#D95D39</item>
+        <item name="android:windowMinWidthMajor">92%</item>
+        <item name="android:windowMinWidthMinor">92%</item>
+        <item name="android:windowActionModeOverlay">true</item>
     </style>
 </resources>

@@ -62,8 +62,8 @@ class MainActivity : Activity() {
     }
 
     private fun pairingView(): View = scroll(root().apply {
-        addView(title("Pair LinkSync"))
-        addView(copy("Scan the QR code created by your LinkSync server, or enter its details manually."))
+        addView(title("Pair CrossLinks"))
+        addView(copy("Scan the QR code created by your CrossLinks server, or enter its details manually."))
         val scan = primaryButton("Scan pairing QR") { scanPairingCode() }
         addView(scan, margins(top = 22))
         addView(section("Manual pairing"), margins(top = 26))
@@ -84,12 +84,12 @@ class MainActivity : Activity() {
 
     private fun homeView(): View = scroll(root().apply {
         val credentials = store.load() ?: return@apply
-        addView(title("Send to Chrome"))
+        addView(title("Send with CrossLinks"))
         addView(copy("Paired as ${credentials.deviceName}"))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val roleManager = getSystemService(RoleManager::class.java)
             if (roleManager?.isRoleAvailable(RoleManager.ROLE_BROWSER) == true && !roleManager.isRoleHeld(RoleManager.ROLE_BROWSER)) {
-                addView(secondaryButton("Use LinkSync for web links") {
+                addView(secondaryButton("Use CrossLinks for web links") {
                     startActivityForResult(roleManager.createRequestRoleIntent(RoleManager.ROLE_BROWSER), 40)
                 }, margins(top = 18))
             }
@@ -100,7 +100,7 @@ class MainActivity : Activity() {
             addView(section("Link"), margins(top = 24))
             addView(copy(shared))
         } else {
-            addView(copy("Choose LinkSync from Android's Share or Open with menu to send a URL."), margins(top = 24))
+            addView(copy("Choose CrossLinks from Android's Share or Open with menu to send a URL."), margins(top = 24))
         }
 
         addView(section("Target browser"), margins(top = 24))
@@ -109,12 +109,24 @@ class MainActivity : Activity() {
         val status = statusText()
         val send = primaryButton("Send link") {
             val selected = targets.findViewById<RadioButton>(targets.checkedRadioButtonId)?.tag as? String
-            if (shared == null) status.error("Open or share a URL with LinkSync first")
+            if (shared == null) status.error("Open or share a URL with CrossLinks first")
             else if (selected == null) status.error("Choose a target browser")
             else send(shared, selected, status)
         }.apply { isEnabled = false }
         addView(send, margins(top = 16))
         addView(status, margins(top = 10))
+        addView(secondaryButton("Check for updates") {
+            status.text = "Checking versions…"
+            background(
+                work = { api.versions(credentials) },
+                success = { versions ->
+                    val app = appVersion()
+                    val health = if (app == versions.android && versions.android == versions.extension) "All components match" else "A component update may be available"
+                    status.text = "$health · app $app · server ${versions.server} · extension ${versions.extension}"
+                },
+                failure = { status.error(it.message ?: "Could not check versions") },
+            )
+        }, margins(top = 16))
         addView(section("Recent history"), margins(top = 28))
         val history = LinearLayout(this@MainActivity).apply { orientation = LinearLayout.VERTICAL }
         addView(history)
@@ -151,16 +163,24 @@ class MainActivity : Activity() {
             .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
             .enableAutoZoom()
             .build()
-        GmsBarcodeScanning.getClient(this, options).startScan()
-            .addOnSuccessListener { barcode ->
-                runCatching { PairingPayload.parse(barcode.rawValue ?: "") }
-                    .onSuccess { payload ->
-                        pairingPayload = payload
-                        showScannedPairing(payload)
-                    }
-                    .onFailure { showMessage(it.message ?: "That QR code is not a LinkSync pairing code") }
-            }
-            .addOnFailureListener { showMessage(it.message ?: "QR scanning failed") }
+        try {
+            GmsBarcodeScanning.getClient(this, options).startScan()
+                .addOnSuccessListener { barcode ->
+                    runCatching { PairingPayload.parse(barcode.rawValue ?: "") }
+                        .onSuccess { payload ->
+                            pairingPayload = payload
+                            showScannedPairing(payload)
+                        }
+                        .onFailure { showMessage(it.message ?: "That QR code is not a CrossLinks pairing code") }
+                }
+                .addOnFailureListener { showMessage(it.message ?: "QR scanning failed") }
+        } catch (error: RuntimeException) {
+            // Google Play services can fail before returning a Task when the
+            // optional scanner module is unavailable or the device has no
+            // compatible Play services. Keep that device-side failure from
+            // taking down the app and let the user use manual pairing.
+            showMessage(error.message ?: "QR scanning is unavailable on this device")
+        }
     }
 
     private fun showScannedPairing(payload: PairingPayload) {
@@ -207,7 +227,7 @@ class MainActivity : Activity() {
             else -> null
         } ?: return null
         return runCatching { validateSharedUrl(raw) }.getOrElse {
-            main.post { showMessage(it.message ?: "LinkSync only accepts complete HTTP or HTTPS URLs") }
+            main.post { showMessage(it.message ?: "CrossLinks only accepts complete HTTP or HTTPS URLs") }
             null
         }
     }
@@ -243,7 +263,8 @@ class MainActivity : Activity() {
     private fun secondaryButton(textValue: String, action: () -> Unit) = Button(this).apply { text = textValue; alpha = .82f; setOnClickListener { action() } }
     private fun TextView.error(message: String) { text = message; setTextColor(Color.rgb(198, 40, 40)) }
     private fun showMessage(message: String) = android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_LONG).show()
-    private fun colorAccent(): Int = if ((resources.configuration.uiMode and 0x30) == 0x20) Color.rgb(124, 157, 255) else Color.rgb(41, 98, 255)
+    private fun colorAccent(): Int = if ((resources.configuration.uiMode and 0x30) == 0x20) Color.rgb(255, 155, 122) else Color.rgb(217, 93, 57)
+    private fun appVersion(): String = packageManager.getPackageInfo(packageName, 0).versionName ?: "unknown"
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
     private fun margins(top: Int = 0): ViewGroup.MarginLayoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(top) }
 }
