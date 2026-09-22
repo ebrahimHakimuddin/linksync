@@ -31,6 +31,13 @@ export interface DeliveryState {
 export const SETTINGS_KEY = "settings";
 export const ACTIVITY_KEY = "activity";
 export const DELIVERY_STATES_KEY = "deliveryStates";
+export const CONNECTION_KEY = "connection";
+
+export type ConnectionStatus = {
+  state: "connecting" | "online" | "offline";
+  message?: string;
+  at: number;
+};
 
 export function normalizeServerUrl(raw: string): string {
   const url = new URL(raw.trim());

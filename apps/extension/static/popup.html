@@ -3,14 +3,15 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>LinkSync</title>
+    <title>CrossLinks</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body class="popup">
     <main class="card">
-      <header><div class="mark" aria-hidden="true">↗</div><div><h1>LinkSync</h1><p id="connection">Loading…</p></div></header>
+      <header><div class="mark" aria-hidden="true"><span></span></div><div><h1>CrossLinks</h1><p id="connection">Loading…</p></div></header>
       <label class="pause"><span>Pause deliveries</span><input id="paused" type="checkbox" role="switch"></label>
       <section><h2>Recent activity</h2><ol id="activity" class="activity"></ol></section>
+      <button id="sync" type="button">Check for links</button>
       <button id="settings" class="secondary" type="button">Settings</button>
     </main>
     <script type="module" src="popup.js"></script>

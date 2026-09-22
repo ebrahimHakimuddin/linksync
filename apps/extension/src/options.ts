@@ -1,4 +1,4 @@
-import { SETTINGS_KEY, getSettings, normalizeServerUrl, originPermission } from "./shared.js";
+import { apiFetch, SETTINGS_KEY, getSettings, normalizeServerUrl, originPermission } from "./shared.js";
 
 const form = document.querySelector<HTMLFormElement>("#pair-form")!;
 const serverInput = document.querySelector<HTMLInputElement>("#server-url")!;
@@ -10,6 +10,8 @@ const pairedCopy = document.querySelector<HTMLElement>("#paired-copy")!;
 const pairedAutoOpen = document.querySelector<HTMLInputElement>("#paired-auto-open")!;
 const unpair = document.querySelector<HTMLButtonElement>("#unpair")!;
 const status = document.querySelector<HTMLElement>("#status")!;
+const versionsCopy = document.querySelector<HTMLElement>("#versions-copy")!;
+const checkVersions = document.querySelector<HTMLButtonElement>("#check-versions")!;
 
 function setStatus(message: string, error = false): void {
   status.textContent = message;
@@ -86,6 +88,25 @@ unpair.addEventListener("click", () => {
     if (settings) await chrome.permissions.remove({ origins: [originPermission(settings.serverUrl)] });
     setStatus("Local credentials removed. Revoke this browser in the server admin page as well.");
     await render();
+  })();
+});
+
+checkVersions.addEventListener("click", () => {
+  void (async () => {
+    checkVersions.disabled = true;
+    versionsCopy.textContent = "Checking…";
+    try {
+      const response = await apiFetch("/api/v1/version");
+      if (!response.ok) throw new Error(`Version check failed (${response.status})`);
+      const versions = await response.json() as { server: string; android: string; extension: string };
+      const extension = chrome.runtime.getManifest().version;
+      const health = extension === versions.extension && versions.extension === versions.android ? "All components match" : "A component update may be available";
+      versionsCopy.textContent = `${health} · extension ${extension} · server ${versions.server} · Android ${versions.android}`;
+    } catch (error) {
+      versionsCopy.textContent = error instanceof Error ? error.message : "Version check failed.";
+    } finally {
+      checkVersions.disabled = false;
+    }
   })();
 });
 

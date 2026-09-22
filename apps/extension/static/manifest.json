@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "LinkSync",
-  "description": "Open URLs sent from your Android device in Chrome.",
+  "name": "CrossLinks",
+  "description": "Open links sent from your Android device in Chrome.",
   "version": "0.1.0",
   "minimum_chrome_version": "116",
   "permissions": ["alarms", "notifications", "storage", "tabs"],
@@ -16,7 +16,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "LinkSync",
+    "default_title": "CrossLinks",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png"

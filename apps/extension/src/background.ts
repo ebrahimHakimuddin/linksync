@@ -1,5 +1,6 @@
 import {
   ACTIVITY_KEY,
+  CONNECTION_KEY,
   DELIVERY_STATES_KEY,
   type ActivityItem,
   type Delivery,
@@ -8,6 +9,7 @@ import {
   getSettings,
   websocketUrl
 } from "./shared.js";
+import type { ConnectionStatus } from "./shared.js";
 
 const POLL_ALARM = "poll-deliveries";
 const NOTIFICATION_PREFIX = "linksync:";
@@ -15,6 +17,10 @@ let liveSocket: WebSocket | undefined;
 let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 let heartbeatTimer: ReturnType<typeof setInterval> | undefined;
 let draining = false;
+
+async function setConnection(state: ConnectionStatus["state"], message?: string): Promise<void> {
+  await chrome.storage.local.set({ [CONNECTION_KEY]: { state, ...(message ? { message } : {}), at: Date.now() } satisfies ConnectionStatus });
+}
 
 async function addActivity(item: ActivityItem): Promise<void> {
   const stored = await chrome.storage.local.get(ACTIVITY_KEY);
@@ -98,7 +104,7 @@ async function drainQueue(): Promise<void> {
       await handleDelivery(delivery);
     }
   } catch (error) {
-    console.warn("LinkSync queue unavailable", error);
+    await setConnection("offline", error instanceof Error ? error.message : "Server is unavailable");
   } finally {
     draining = false;
   }
@@ -117,18 +123,24 @@ async function connectLive(): Promise<void> {
   closeLiveSocket();
   const settings = await getSettings();
   if (!settings || settings.paused) return;
+  await setConnection("connecting");
   const socket = new WebSocket(websocketUrl(settings.serverUrl));
   liveSocket = socket;
   socket.addEventListener("open", () => socket.send(JSON.stringify({ type: "authenticate", token: settings.token })));
   socket.addEventListener("message", (event) => {
     let message: { type?: string };
     try { message = JSON.parse(String(event.data)) as { type?: string }; } catch { return; }
-    if (message.type === "authenticated" || message.type === "delivery_available") void drainQueue();
+    if (message.type === "authenticated") {
+      void setConnection("online");
+      void drainQueue();
+    } else if (message.type === "delivery_available") void drainQueue();
   });
+  socket.addEventListener("error", () => void setConnection("offline", "Could not reach the CrossLinks server"));
   socket.addEventListener("close", () => {
     if (liveSocket !== socket) return;
     liveSocket = undefined;
     if (heartbeatTimer) clearInterval(heartbeatTimer);
+    void setConnection("offline", "Server connection lost — retrying");
     reconnectTimer = setTimeout(() => void connectLive(), 5_000);
   });
   heartbeatTimer = setInterval(() => {
@@ -146,6 +158,13 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes.settings) void connectLive();
+});
+chrome.runtime.onMessage.addListener((message: { type?: string }, _sender, sendResponse) => {
+  if (message.type !== "sync-now") return;
+  void drainQueue().then(() => sendResponse({ ok: true })).catch((error: unknown) => {
+    sendResponse({ ok: false, message: error instanceof Error ? error.message : "Could not check for links" });
+  });
+  return true;
 });
 chrome.notifications.onClicked.addListener((notificationId) => {
   if (!notificationId.startsWith(NOTIFICATION_PREFIX)) return;
