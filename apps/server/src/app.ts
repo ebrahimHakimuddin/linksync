@@ -30,9 +30,9 @@ interface JsonBody {
 const SESSION_COOKIE = "linksync_session";
 const SESSION_TTL_MS = 12 * 60 * 60 * 1_000;
 const RELEASE_VERSIONS = {
-  server: "0.1.0",
-  android: "0.1.0",
-  extension: "0.1.0"
+  server: "0.2.0",
+  android: "0.2.0",
+  extension: "0.2.0"
 } as const;
 
 function cleanName(value: unknown): string | undefined {
