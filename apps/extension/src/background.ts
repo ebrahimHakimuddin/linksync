@@ -80,14 +80,16 @@ async function handleDelivery(delivery: Delivery): Promise<void> {
       await chrome.storage.local.set({ [`pending:${delivery.id}`]: delivery.url });
       await addActivity({ deliveryId: delivery.id, url: delivery.url, outcome: "notified", at: Date.now() });
     }
-    await setDeliveryState(delivery.id, { phase: "handled", url: delivery.url, at: Date.now() });
-    await acknowledge(delivery.id, "delivered");
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown browser error";
     await addActivity({ deliveryId: delivery.id, url: delivery.url, outcome: "failed", at: Date.now() });
     await setDeliveryState(delivery.id, { phase: "handled", url: delivery.url, at: Date.now() });
     await acknowledge(delivery.id, "failed", message);
+    return;
   }
+  // Outside the try: a network error here must not report an opened tab as failed.
+  await setDeliveryState(delivery.id, { phase: "handled", url: delivery.url, at: Date.now() });
+  await acknowledge(delivery.id, "delivered");
 }
 
 async function drainQueue(): Promise<void> {
