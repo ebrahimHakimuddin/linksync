@@ -2,7 +2,6 @@ package dev.linksync.app
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -29,6 +28,7 @@ class ShareActivity : Activity() {
         content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(24), dp(22), dp(24), dp(18))
+            background = Brand.card(this@ShareActivity, 24)
         }
         setContentView(content)
         window.setBackgroundDrawableResource(android.R.color.transparent)
@@ -50,16 +50,18 @@ class ShareActivity : Activity() {
         content.addView(TextView(this).apply {
             text = "Send with CrossLinks"
             textSize = 22f
-            setTextColor(colorAccent())
+            typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
+            setTextColor(Brand.text(this@ShareActivity))
         })
         content.addView(TextView(this).apply {
             text = url
             textSize = 14f
             maxLines = 2
             ellipsize = android.text.TextUtils.TruncateAt.END
+            setTextColor(Brand.muted(this@ShareActivity))
             setPadding(0, dp(8), 0, dp(16))
         })
-        val status = TextView(this)
+        val status = TextView(this).apply { setTextColor(Brand.muted(this@ShareActivity)) }
         content.addView(status)
         background(
             work = { api.devices(credentials) },
@@ -70,7 +72,7 @@ class ShareActivity : Activity() {
                     content.addView(status, 2)
                 } else {
                     devices.forEach { device ->
-                        content.addView(Button(this).apply {
+                        content.addView(Brand.primary(Button(this)).apply {
                             text = if (device.online) "${device.name}  ·  online" else "${device.name}  ·  queued"
                             setOnClickListener {
                                 isEnabled = false
@@ -83,7 +85,7 @@ class ShareActivity : Activity() {
                             }
                         }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
                     }
-                    content.addView(Button(this).apply {
+                    content.addView(Brand.secondary(Button(this)).apply {
                         text = "Cancel"
                         setOnClickListener { finish() }
                     }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
@@ -95,13 +97,13 @@ class ShareActivity : Activity() {
 
     private fun showPairPrompt(url: String) {
         content.removeAllViews()
-        content.addView(TextView(this).apply { text = "CrossLinks isn't paired"; textSize = 21f; setTextColor(colorAccent()) })
-        content.addView(TextView(this).apply { text = "Open CrossLinks to pair this phone before sending."; setPadding(0, dp(8), 0, dp(12)) })
-        content.addView(Button(this).apply {
+        content.addView(TextView(this).apply { text = "CrossLinks isn't paired"; textSize = 21f; setTextColor(Brand.text(this@ShareActivity)) })
+        content.addView(TextView(this).apply { text = "Open CrossLinks to pair this phone before sending."; setTextColor(Brand.muted(this@ShareActivity)); setPadding(0, dp(8), 0, dp(12)) })
+        content.addView(Brand.primary(Button(this)).apply {
             text = "Open CrossLinks"
             setOnClickListener { startActivity(Intent(this@ShareActivity, MainActivity::class.java).putExtra(Intent.EXTRA_TEXT, url)); finish() }
         })
-        content.addView(Button(this).apply { text = "Cancel"; setOnClickListener { finish() } })
+        content.addView(Brand.secondary(Button(this)).apply { text = "Cancel"; setOnClickListener { finish() } }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
     }
 
     private fun readUrl(): String? = runCatching {
@@ -122,6 +124,5 @@ class ShareActivity : Activity() {
         worker.execute { runCatching(work).onSuccess { main.post { success(it) } }.onFailure { main.post { failure(it) } } }
     }
 
-    private fun colorAccent(): Int = Color.rgb(217, 93, 57)
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 }

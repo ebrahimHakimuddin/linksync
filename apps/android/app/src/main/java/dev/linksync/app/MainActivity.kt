@@ -3,7 +3,6 @@ package dev.linksync.app
 import android.app.Activity
 import android.app.role.RoleManager
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Build
 import android.os.Handler
@@ -58,7 +57,15 @@ class MainActivity : Activity() {
 
     private fun root(): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
-        setPadding(dp(24), dp(36), dp(24), dp(28))
+        setPadding(dp(24), dp(28), dp(24), dp(28))
+        addView(brandHeader(), margins().apply { bottomMargin = dp(28) })
+    }
+
+    private fun brandHeader(): View = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        addView(android.widget.ImageView(this@MainActivity).apply { setImageResource(R.mipmap.ic_launcher) }, LinearLayout.LayoutParams(dp(40), dp(40)))
+        addView(Brand.wordmark(TextView(this@MainActivity)), LinearLayout.LayoutParams(-2, -2).apply { marginStart = dp(10) })
     }
 
     private fun pairingView(): View = scroll(root().apply {
@@ -104,8 +111,12 @@ class MainActivity : Activity() {
         }
 
         addView(section("Target browser"), margins(top = 24))
-        val targets = RadioGroup(this@MainActivity).apply { orientation = RadioGroup.VERTICAL }
-        addView(targets)
+        val targets = RadioGroup(this@MainActivity).apply {
+            orientation = RadioGroup.VERTICAL
+            background = Brand.card(this@MainActivity)
+            setPadding(dp(12), dp(6), dp(12), dp(6))
+        }
+        addView(targets, margins(top = 8))
         val status = statusText()
         val send = primaryButton("Send link") {
             val selected = targets.findViewById<RadioButton>(targets.checkedRadioButtonId)?.tag as? String
@@ -128,8 +139,12 @@ class MainActivity : Activity() {
             )
         }, margins(top = 16))
         addView(section("Recent history"), margins(top = 28))
-        val history = LinearLayout(this@MainActivity).apply { orientation = LinearLayout.VERTICAL }
-        addView(history)
+        val history = LinearLayout(this@MainActivity).apply {
+            orientation = LinearLayout.VERTICAL
+            background = Brand.card(this@MainActivity)
+            setPadding(dp(16), dp(6), dp(16), dp(6))
+        }
+        addView(history, margins(top = 8))
         addView(secondaryButton("Forget this server") {
             store.clear(); pairingPayload = null; incomingUrl = null; render()
         }, margins(top = 28))
@@ -139,7 +154,8 @@ class MainActivity : Activity() {
             success = { (devices, items) ->
                 targets.removeAllViews()
                 devices.forEach { device ->
-                    targets.addView(RadioButton(this@MainActivity).apply {
+                    targets.addView(Brand.tint(RadioButton(this@MainActivity)).apply {
+                        minHeight = dp(48)
                         id = View.generateViewId()
                         tag = device.id
                         text = if (device.online) "${device.name} · online" else "${device.name} · offline, will queue"
@@ -241,29 +257,42 @@ class MainActivity : Activity() {
     private fun historyRow(item: HistoryItem): View = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
         setPadding(0, dp(9), 0, dp(9))
-        addView(TextView(this@MainActivity).apply { text = item.url; maxLines = 1 })
+        addView(TextView(this@MainActivity).apply {
+            text = item.url; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END
+            setTextColor(Brand.text(this@MainActivity))
+        })
         addView(TextView(this@MainActivity).apply {
             text = getString(
                 R.string.history_metadata,
                 item.status,
                 DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(item.createdAt)),
             )
-            alpha = .65f; textSize = 12f
+            setTextColor(Brand.muted(this@MainActivity)); textSize = 12f
         })
     }
 
     private fun scroll(content: View): ScrollView = ScrollView(this).apply { addView(content) }
-    private fun title(value: String) = TextView(this).apply { text = value; textSize = 28f; setTextColor(colorAccent()); setPadding(0, 0, 0, dp(8)) }
-    private fun section(value: String) = TextView(this).apply { text = value.uppercase(); textSize = 12f; alpha = .65f }
-    private fun copy(value: String) = TextView(this).apply { text = value; textSize = 15f; setTextIsSelectable(true) }
-    private fun label(value: String) = TextView(this).apply { text = value; textSize = 13f }
-    private fun input(hintValue: String) = EditText(this).apply { hint = hintValue; isSingleLine = true; setPadding(dp(12), dp(10), dp(12), dp(10)) }
-    private fun statusText() = TextView(this).apply { setTextIsSelectable(true) }
-    private fun primaryButton(textValue: String, action: () -> Unit) = Button(this).apply { text = textValue; setOnClickListener { action() } }
-    private fun secondaryButton(textValue: String, action: () -> Unit) = Button(this).apply { text = textValue; alpha = .82f; setOnClickListener { action() } }
-    private fun TextView.error(message: String) { text = message; setTextColor(Color.rgb(198, 40, 40)) }
+    private fun title(value: String) = TextView(this).apply {
+        text = value; textSize = 28f; letterSpacing = -0.02f
+        typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
+        setTextColor(Brand.text(this@MainActivity)); setPadding(0, 0, 0, dp(6))
+    }
+    private fun section(value: String) = TextView(this).apply {
+        text = value.uppercase(); textSize = 11f; letterSpacing = 0.09f
+        typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
+        setTextColor(Brand.muted(this@MainActivity))
+    }
+    private fun copy(value: String) = TextView(this).apply { text = value; textSize = 15f; setTextColor(Brand.muted(this@MainActivity)); setTextIsSelectable(true) }
+    private fun label(value: String) = TextView(this).apply {
+        text = value; textSize = 13f; setPadding(0, 0, 0, dp(6)); setTextColor(Brand.text(this@MainActivity))
+        typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
+    }
+    private fun input(hintValue: String) = Brand.input(EditText(this)).apply { hint = hintValue; isSingleLine = true }
+    private fun statusText() = TextView(this).apply { setTextColor(Brand.muted(this@MainActivity)); setTextIsSelectable(true) }
+    private fun primaryButton(textValue: String, action: () -> Unit) = Brand.primary(Button(this)).apply { text = textValue; setOnClickListener { action() } }
+    private fun secondaryButton(textValue: String, action: () -> Unit) = Brand.secondary(Button(this)).apply { text = textValue; setOnClickListener { action() } }
+    private fun TextView.error(message: String) { text = message; setTextColor(Brand.danger(this@MainActivity)) }
     private fun showMessage(message: String) = android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_LONG).show()
-    private fun colorAccent(): Int = if ((resources.configuration.uiMode and 0x30) == 0x20) Color.rgb(255, 155, 122) else Color.rgb(217, 93, 57)
     private fun appVersion(): String = packageManager.getPackageInfo(packageName, 0).versionName ?: "unknown"
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
     private fun margins(top: Int = 0): ViewGroup.MarginLayoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(top) }

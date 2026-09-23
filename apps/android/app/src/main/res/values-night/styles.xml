@@ -1,15 +1,21 @@
 <resources>
     <style name="Theme.LinkSync" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#FF9B7A</item>
-        <item name="android:navigationBarColor">#10131A</item>
-        <item name="android:statusBarColor">#10131A</item>
+        <item name="android:colorAccent">#3D9BFF</item>
+        <item name="android:colorPrimary">#3D9BFF</item>
+        <item name="android:colorControlActivated">#3D9BFF</item>
+        <item name="android:textColorPrimary">#E2E8F0</item>
+        <item name="android:windowBackground">@color/brand_background</item>
+        <item name="android:navigationBarColor">#0B1120</item>
+        <item name="android:statusBarColor">#0B1120</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
-    <style name="Theme.CrossLinks.Share" parent="android:style/Theme.Material.NoActionBar">
+    <style name="Theme.CrossLinks.Share" parent="android:style/Theme.Material.Dialog">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#FF9B7A</item>
+        <item name="android:colorAccent">#3D9BFF</item>
+        <item name="android:windowNoTitle">true</item>
         <item name="android:windowMinWidthMajor">92%</item>
         <item name="android:windowMinWidthMinor">92%</item>
     </style>
+    <color name="brand_background">#0B1120</color>
 </resources>
