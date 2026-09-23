@@ -4,29 +4,41 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CrossLinks settings</title>
+    <link rel="icon" href="icons/icon-32.png">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body class="page">
-    <main class="card settings">
-      <header>
-        <div class="mark" aria-hidden="true"><span></span></div>
-        <div><h1>CrossLinks</h1><p>Pair this browser with your server.</p></div>
-      </header>
-      <form id="pair-form">
-        <label>Server URL<input id="server-url" type="url" required placeholder="https://links.example.com" autocomplete="url"></label>
-        <label>Pairing code<input id="pairing-code" required placeholder="ABCDE-FGHIJ" maxlength="11" autocomplete="one-time-code"></label>
-        <label>Device name<input id="device-name" required maxlength="80" autocomplete="off"></label>
-        <label class="check"><input id="auto-open" type="checkbox"> Open received links automatically</label>
-        <button type="submit">Pair browser</button>
-      </form>
-      <section id="paired" hidden>
-        <h2>Paired</h2>
-        <p id="paired-copy"></p>
-        <label class="check"><input id="paired-auto-open" type="checkbox"> Open received links automatically</label>
-        <button id="unpair" class="secondary" type="button">Forget this server</button>
-        <div class="versions">
-          <div><strong>Version check</strong><span id="versions-copy">Not checked yet</span></div>
-          <button id="check-versions" class="secondary" type="button">Check for updates</button>
+    <main class="settings">
+      <div class="brand"><img src="icons/icon-48.png" alt=""><span class="wordmark">crosslinks</span></div>
+      <section class="panel" id="pair-panel">
+        <div><h1>Connect your phone</h1><p class="muted">Pair this browser with your CrossLinks server to receive links from Android.</p></div>
+        <form id="pair-form">
+          <label class="field">Server URL<input id="server-url" type="url" required placeholder="https://links.example.com" autocomplete="url"></label>
+          <label class="field">Pairing code<input id="pairing-code" required placeholder="ABCDE-FGHIJ" maxlength="11" autocomplete="one-time-code"></label>
+          <label class="field">Device name<input id="device-name" required maxlength="80" autocomplete="off"></label>
+          <label class="switch-row"><input id="auto-open" class="switch" type="checkbox"> Open received links automatically</label>
+          <button class="primary" type="submit">Pair browser</button>
+        </form>
+      </section>
+      <section class="panel" id="paired" hidden>
+        <div><h1>Connected</h1><p id="paired-copy" class="muted"></p></div>
+        <label class="switch-row"><input id="paired-auto-open" class="switch" type="checkbox"> Open received links automatically</label>
+        <div class="stat">
+          <div><strong>Version check</strong><p id="versions-copy" class="hint">Not checked yet</p></div>
+          <button id="check-versions" class="ghost" type="button">Check for updates</button>
+        </div>
+        <button id="unpair" class="ghost danger" type="button">Forget this server</button>
+      </section>
+      <section class="panel">
+        <div><h1>Reading library</h1><p class="muted">Saved articles sync through your Chrome profile to every computer you sign in on.</p></div>
+        <div class="stat">
+          <div><strong id="library-count">…</strong><p id="library-usage" class="hint"></p></div>
+          <button id="open-library" class="ghost" type="button">Open library</button>
+        </div>
+        <div class="progress"><span id="usage-bar" style="width: 0"></span></div>
+        <div class="stat">
+          <div><strong>Keyboard shortcut</strong><p id="shortcut" class="hint">Alt+Shift+S</p></div>
+          <button id="shortcuts" class="ghost" type="button">Change</button>
         </div>
       </section>
       <p id="status" role="status" aria-live="polite"></p>

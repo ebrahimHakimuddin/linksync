@@ -1,10 +1,12 @@
 import { apiFetch, SETTINGS_KEY, getSettings, normalizeServerUrl, originPermission } from "./shared.js";
+import { LEGACY_LIBRARY_KEY, getLibrary } from "./reading.js";
 
 const form = document.querySelector<HTMLFormElement>("#pair-form")!;
 const serverInput = document.querySelector<HTMLInputElement>("#server-url")!;
 const codeInput = document.querySelector<HTMLInputElement>("#pairing-code")!;
 const nameInput = document.querySelector<HTMLInputElement>("#device-name")!;
 const autoOpenInput = document.querySelector<HTMLInputElement>("#auto-open")!;
+const pairPanel = document.querySelector<HTMLElement>("#pair-panel")!;
 const pairedSection = document.querySelector<HTMLElement>("#paired")!;
 const pairedCopy = document.querySelector<HTMLElement>("#paired-copy")!;
 const pairedAutoOpen = document.querySelector<HTMLInputElement>("#paired-auto-open")!;
@@ -20,7 +22,7 @@ function setStatus(message: string, error = false): void {
 
 async function render(): Promise<void> {
   const settings = await getSettings();
-  form.hidden = Boolean(settings);
+  pairPanel.hidden = Boolean(settings);
   pairedSection.hidden = !settings;
   if (settings) {
     pairedCopy.textContent = `${settings.deviceName} is connected to ${settings.serverUrl}.`;
@@ -84,7 +86,8 @@ pairedAutoOpen.addEventListener("change", () => {
 unpair.addEventListener("click", () => {
   void (async () => {
     const settings = await getSettings();
-    await chrome.storage.local.clear();
+    // Keep a not-yet-migrated reading library; only drop pairing state.
+    await chrome.storage.local.remove(Object.keys(await chrome.storage.local.get(null)).filter((key) => key !== LEGACY_LIBRARY_KEY));
     if (settings) await chrome.permissions.remove({ origins: [originPermission(settings.serverUrl)] });
     setStatus("Local credentials removed. Revoke this browser in the server admin page as well.");
     await render();
@@ -110,4 +113,21 @@ checkVersions.addEventListener("click", () => {
   })();
 });
 
+async function renderLibrary(): Promise<void> {
+  const { articles } = await getLibrary();
+  const used = await chrome.storage.sync.getBytesInUse(null);
+  const share = used / chrome.storage.sync.QUOTA_BYTES;
+  document.querySelector("#library-count")!.textContent = `${articles.length} saved article${articles.length === 1 ? "" : "s"}`;
+  document.querySelector("#library-usage")!.textContent = `${Math.round(share * 100)}% of Chrome sync storage used`;
+  document.querySelector<HTMLElement>("#usage-bar")!.style.width = `${Math.max(2, Math.round(share * 100))}%`;
+  const [command] = (await chrome.commands.getAll()).filter((c) => c.name === "save-position");
+  document.querySelector("#shortcut")!.textContent = command?.shortcut || "Not set";
+}
+
+document.querySelector("#open-library")!.addEventListener("click", () => void chrome.tabs.create({ url: "library.html" }));
+document.querySelector("#shortcuts")!.addEventListener("click", () => void chrome.tabs.create({ url: "chrome://extensions/shortcuts" }));
+chrome.storage.onChanged.addListener((_changes, area) => {
+  if (area === "sync") void renderLibrary();
+});
 void render();
+void renderLibrary();

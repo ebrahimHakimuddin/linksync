@@ -48,6 +48,13 @@ Open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and
 select `apps/extension/dist`. Create a Chrome pairing code in the server console,
 then enter the server URL and code in the extension settings.
 
+The extension also keeps a reading library: **Save position** in the popup, the
+right-click menu (select text first to pin that exact passage), or `Alt+Shift+S`
+stores the page with the passage you were reading. Articles are organized into
+lists and can be marked as read. Opening one scrolls back to that passage using
+Chrome text fragments. The library works without pairing and syncs through the
+Chrome profile (`chrome.storage.sync`, about 250 articles), not the CrossLinks server.
+
 ## Build Android
 
 ```sh

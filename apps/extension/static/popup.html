@@ -7,13 +7,30 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body class="popup">
-    <main class="card">
-      <header><div class="mark" aria-hidden="true"><span></span></div><div><h1>CrossLinks</h1><p id="connection">Loading…</p></div></header>
-      <label class="pause"><span>Pause deliveries</span><input id="paused" type="checkbox" role="switch"></label>
-      <section><h2>Recent activity</h2><ol id="activity" class="activity"></ol></section>
-      <button id="sync" type="button">Check for links</button>
-      <button id="settings" class="secondary" type="button">Settings</button>
-    </main>
+    <header class="topbar">
+      <div class="brand"><img src="icons/icon-48.png" alt=""><span class="wordmark">crosslinks</span></div>
+      <span id="connection" class="pill">Loading…</span>
+    </header>
+    <section class="panel save-panel">
+      <p class="eyebrow">Save this page</p>
+      <div class="row">
+        <select id="save-list" aria-label="List"></select>
+        <button id="save" class="primary" type="button">Save position</button>
+      </div>
+      <p id="save-status" class="hint" role="status" aria-live="polite">Or right-click any page · Alt+Shift+S</p>
+    </section>
+    <section>
+      <div class="section-head"><p class="eyebrow">Continue reading</p><button id="library" class="link-btn" type="button">Open library →</button></div>
+      <ol id="continue" class="mini-list"></ol>
+    </section>
+    <section>
+      <div class="section-head"><p class="eyebrow">From your phone</p><button id="sync" class="link-btn" type="button">Check now</button></div>
+      <ol id="activity" class="mini-list"></ol>
+    </section>
+    <footer class="popup-footer">
+      <label class="switch-row"><input id="paused" class="switch" type="checkbox" role="switch"> Pause deliveries</label>
+      <button id="settings" class="icon-btn" type="button" aria-label="Settings" title="Settings"></button>
+    </footer>
     <script type="module" src="popup.js"></script>
   </body>
 </html>

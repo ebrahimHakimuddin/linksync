@@ -13,6 +13,14 @@ during pairing and stored as one-way hashes on the server. Android stores its de
 credential encrypted with Android Keystore. Chrome stores its credential in local
 extension storage.
 
+When the user saves a page to the Chrome reading library, the extension reads the
+current page's URL, title, scroll percentage, and a short passage of visible text
+(up to eight words) to restore the reading position later. This runs only on the
+tab the user explicitly saves. The library is stored in Chrome sync storage, so Chrome
+syncs it through the user's Google account to their other signed-in browsers under
+Google's privacy terms; it is never sent to the CrossLinks server. Page favicons in
+the library are read from Chrome's local favicon cache.
+
 The Android app uses Google Play services Code Scanner to scan a CrossLinks pairing
 QR code without requesting camera permission. Google Play services supplies the
 scanner interface; image processing occurs on the device. Consult Google's privacy

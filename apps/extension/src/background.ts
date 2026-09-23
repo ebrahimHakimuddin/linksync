@@ -10,6 +10,7 @@ import {
   websocketUrl
 } from "./shared.js";
 import type { ConnectionStatus } from "./shared.js";
+import { ARTICLE_PREFIX, DEFAULT_LIST, LISTS_KEY, getLibrary, saveTab } from "./reading.js";
 
 const POLL_ALARM = "poll-deliveries";
 const NOTIFICATION_PREFIX = "linksync:";
@@ -151,10 +152,14 @@ async function connectLive(): Promise<void> {
 }
 
 chrome.runtime.onInstalled.addListener(() => {
+  void rebuildMenus();
   void chrome.alarms.create(POLL_ALARM, { periodInMinutes: 0.5 });
   void connectLive();
 });
-chrome.runtime.onStartup.addListener(() => void connectLive());
+chrome.runtime.onStartup.addListener(() => {
+  void rebuildMenus();
+  void connectLive();
+});
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === POLL_ALARM) void drainQueue();
 });
@@ -167,6 +172,42 @@ chrome.runtime.onMessage.addListener((message: { type?: string }, _sender, sendR
     sendResponse({ ok: false, message: error instanceof Error ? error.message : "Could not check for links" });
   });
   return true;
+});
+const MENU_PREFIX = "save:";
+
+let menuQueue = Promise.resolve();
+
+// Serialized: overlapping removeAll/create runs would collide on duplicate menu ids.
+function rebuildMenus(): Promise<void> {
+  menuQueue = menuQueue.then(buildMenus, buildMenus);
+  return menuQueue;
+}
+
+async function buildMenus(): Promise<void> {
+  const { lists } = await getLibrary();
+  await chrome.contextMenus.removeAll();
+  chrome.contextMenus.create({ id: "save", title: "Save reading position to", contexts: ["page", "selection"] });
+  for (const list of lists) chrome.contextMenus.create({ id: MENU_PREFIX + list, parentId: "save", title: list, contexts: ["page", "selection"] });
+}
+
+function saveWithBadge(tab: chrome.tabs.Tab | undefined, list: string, selection?: string): void {
+  if (!tab?.id) return;
+  const tabId = tab.id;
+  void saveTab(tab, list, selection)
+    .then(() => chrome.action.setBadgeText({ tabId, text: "✓" }))
+    .catch(() => chrome.action.setBadgeText({ tabId, text: "!" }));
+}
+
+chrome.commands.onCommand.addListener((command, tab) => {
+  if (command === "save-position") saveWithBadge(tab, DEFAULT_LIST);
+});
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  const id = String(info.menuItemId);
+  if (id.startsWith(MENU_PREFIX)) saveWithBadge(tab, id.slice(MENU_PREFIX.length), info.selectionText);
+});
+chrome.storage.onChanged.addListener((changes, area) => {
+  // Article keys matter too: saving to a list another device created adds it to the menu.
+  if (area === "sync" && Object.keys(changes).some((key) => key === LISTS_KEY || key.startsWith(ARTICLE_PREFIX))) void rebuildMenus();
 });
 chrome.notifications.onClicked.addListener((notificationId) => {
   if (!notificationId.startsWith(NOTIFICATION_PREFIX)) return;
