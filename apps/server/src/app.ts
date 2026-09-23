@@ -56,10 +56,11 @@ export async function buildApp(options: BuildOptions): Promise<FastifyInstance> 
   const publicDirectory = import.meta.url.includes("/dist/")
     ? new URL("./public/", import.meta.url)
     : new URL("../public/", import.meta.url);
-  const [adminHtml, adminCss, adminJs] = await Promise.all([
+  const [adminHtml, adminCss, adminJs, adminIcon] = await Promise.all([
     readFile(new URL("index.html", publicDirectory), "utf8"),
     readFile(new URL("admin.css", publicDirectory), "utf8"),
-    readFile(new URL("admin.js", publicDirectory), "utf8")
+    readFile(new URL("admin.js", publicDirectory), "utf8"),
+    readFile(new URL("icon.png", publicDirectory))
   ]);
 
   app.addHook("onSend", async (request, reply, payload) => {
@@ -132,6 +133,7 @@ export async function buildApp(options: BuildOptions): Promise<FastifyInstance> 
   app.get("/admin", async (_request, reply) => reply.type("text/html; charset=utf-8").send(adminHtml));
   app.get("/assets/admin.css", async (_request, reply) => reply.type("text/css; charset=utf-8").send(adminCss));
   app.get("/assets/admin.js", async (_request, reply) => reply.type("text/javascript; charset=utf-8").send(adminJs));
+  app.get("/assets/icon.png", async (_request, reply) => reply.type("image/png").header("Cache-Control", "public, max-age=86400").send(adminIcon));
 
   app.post<{ Body: JsonBody }>("/api/v1/setup", async (request, reply) => {
     if (accountExists()) return reply.code(409).send({ error: "setup_already_completed" });

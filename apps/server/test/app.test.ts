@@ -36,6 +36,8 @@ describe("LinkSync API", () => {
     assert.equal(page.statusCode, 200);
     assert.match(page.headers["content-security-policy"]!, /default-src 'none'/);
     assert.match(page.body, /Set up your server/);
+    const icon = await app.inject({ method: "GET", url: "/assets/icon.png" });
+    assert.equal(icon.headers["content-type"], "image/png");
     const setup = await app.inject({ method: "POST", url: "/api/v1/setup", payload: { token: setupToken, password } });
     assert.equal(setup.statusCode, 201);
     const repeated = await app.inject({ method: "POST", url: "/api/v1/setup", payload: { token: setupToken, password } });

@@ -4,12 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>LinkSync server</title>
+    <title>CrossLinks server</title>
+    <link rel="icon" href="/assets/icon.png">
     <link rel="stylesheet" href="/assets/admin.css">
   </head>
   <body>
     <main>
-      <header><div class="mark" aria-hidden="true">↗</div><div><h1>LinkSync</h1><p>Private link delivery</p></div></header>
+      <header><img class="mark" src="/assets/icon.png" alt=""><div><h1 class="wordmark">crosslinks</h1><p>Private links, wherever you are</p></div></header>
       <section id="loading" class="panel"><p>Loading server state…</p></section>
       <section id="setup" class="panel" hidden>
         <h2>Set up your server</h2>
@@ -31,7 +32,7 @@
           <div class="section-head"><div><h2>Pair a device</h2><p>Pairing codes expire after five minutes and work once.</p></div></div>
           <div class="actions"><button data-pair="android">Pair Android</button><button data-pair="chrome" class="secondary">Pair Chrome</button></div>
           <div id="pairing" class="pairing" hidden>
-            <img id="pairing-qr" alt="Device pairing QR code">
+            <div id="pairing-qr" role="img" aria-label="Device pairing QR code"></div>
             <div><p class="eyebrow">Manual code</p><strong id="pairing-code"></strong><p id="pairing-expiry"></p></div>
           </div>
         </section>

@@ -111,7 +111,7 @@ for (const button of document.querySelectorAll("[data-pair]")) {
   button.addEventListener("click", async () => {
     try {
       const payload = await json("/api/v1/admin/pairings", { method: "POST", body: JSON.stringify({ deviceKind: button.dataset.pair }) });
-      $("#pairing-qr").src = payload.qrDataUrl;
+      $("#pairing-qr").style.backgroundImage = `url("${payload.qrDataUrl}")`;
       $("#pairing-code").textContent = payload.code;
       $("#pairing-expiry").textContent = `Expires ${time(payload.expiresAt)}`;
       $("#pairing").hidden = false;
