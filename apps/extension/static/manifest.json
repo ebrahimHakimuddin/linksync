@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "CrossLinks",
   "description": "Open links sent from your Android device in Chrome, and save articles at the exact spot you stopped reading.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "minimum_chrome_version": "116",
   "permissions": ["activeTab", "alarms", "contextMenus", "favicon", "notifications", "scripting", "storage", "tabs"],
   "optional_host_permissions": [
